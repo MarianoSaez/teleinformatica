@@ -6,6 +6,11 @@ from mininet.cli import CLI
 from mininet.node import OVSController
 
 SUCNO = 6   # Nro. de sucursales
+WANIP = "192.168.100.{}"    # La red dispuesta es 192.168.100.0/24
+WANMASK = "/24"
+SUCRANGE = range(SUCNO) # Puede salir mal. Cambiar por list-comp en todo caso
+SUCIP = "10.0.{}.{}"
+
 
 class Router(Node):
     """
@@ -30,14 +35,9 @@ class NetworkTopo(Topo):
 
     def build(self, **_opts):
 
-        WANIP = "192.168.100.{}"    # La red dispuesta es 192.168.100.0/24
-        WANMASK = "/24"
-        SUCRANGE = range(SUCNO) # Puede salir mal. Cambiar por list-comp en todo caso
-
-        SUCIP = "10.0.{}.{}"
-
         # Crear elementos de la red
         central_router = self.addNode("r0", cls=Router, ip=WANIP.format(6) + "29")
+
         wan_switch_list = [self.addSwitch(f"ws{s + 1}") for s in SUCRANGE]
         lan_switch_list = [self.addSwitch(f"ls{s + 1}") for s in SUCRANGE]
         router_list = [self.addNode(f"r{suc + 1}", cls=Router, ip=WANIP.format(8*(suc + 1) - 7) + "/29") for suc in SUCRANGE]
@@ -51,7 +51,7 @@ class NetworkTopo(Topo):
         ]
 
         # Conectar los elementos de la red
-        # Conectorizar los switches con el router central
+        # Conectar los switches con el router central
         for suc in SUCRANGE:
             self.addLink(
                 wan_switch_list[suc],
@@ -64,7 +64,6 @@ class NetworkTopo(Topo):
 
 
         # Conectar los routers de sucursales a los switches
-        for suc in SUCRANGE:
             self.addLink(
                 router_list[suc],
                 wan_switch_list[suc],
@@ -75,7 +74,6 @@ class NetworkTopo(Topo):
             )
 
         # Contectar los routers de sucursales a los switches de sucursales
-        for suc in SUCRANGE:
             self.addLink(
                 lan_switch_list[suc],
                 router_list[suc],
@@ -86,7 +84,6 @@ class NetworkTopo(Topo):
             )
 
         # Conectar los switches de sucursales a los host
-        for suc in SUCRANGE:
             self.addLink(
                 host_list[suc],
                 lan_switch_list[suc],
@@ -109,6 +106,10 @@ class Main:
         net.start()
         info("*** Tabla de ruteo en Router Central ***\n")
         info(net["r0"].cmd("route"))
+
+        # Configurar tablas de ruteo a cada nodo intermedio
+
+
         CLI(net)
         net.stop()
 
