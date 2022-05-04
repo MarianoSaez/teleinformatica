@@ -104,11 +104,13 @@ class Main:
         )
 
         net.start()
-        info("*** Tabla de ruteo en Router Central ***\n")
-        info(net["r0"].cmd("route"))
 
         # Configurar tablas de ruteo a cada nodo intermedio
-
+        for suc in SUCRANGE:
+            net["r0"].cmd(f"ip route add {SUCIP.format(suc + 1, 0)}/24 via {WANIP.format(8*(suc + 1) - 7)}")
+        
+        info("*** Tabla de ruteo en Router Central ***\n")
+        info(net["r0"].cmd("route"))
 
         CLI(net)
         net.stop()
