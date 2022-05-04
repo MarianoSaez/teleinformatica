@@ -37,11 +37,10 @@ class NetworkTopo(Topo):
         SUCIP = "10.0.{}.{}"
 
         # Crear elementos de la red
-        central_router = self.addNode("r0", cls=Router, ip=WANIP.format())
-        self["r0"].cmd("ip address del 10.0.0.7/8 dev r0-eth0")
+        central_router = self.addNode("r0", cls=Router, ip=WANIP.format(6) + "29")
         wan_switch_list = [self.addSwitch(f"ws{s + 1}") for s in SUCRANGE]
         lan_switch_list = [self.addSwitch(f"ls{s + 1}") for s in SUCRANGE]
-        router_list = [self.addNode(f"r{suc + 1}", cls=Router) for suc in SUCRANGE]
+        router_list = [self.addNode(f"r{suc + 1}", cls=Router, ip=WANIP.format(8*(suc + 1) - 7) + "/29") for suc in SUCRANGE]
         host_list = [
             self.addHost(
                 f"h{suc + 1}",
@@ -51,7 +50,7 @@ class NetworkTopo(Topo):
             for suc in SUCRANGE
         ]
 
-        # Conectar los elementos entre si
+        # Conectar los elementos de la red
         # Conectorizar los switches con el router central
         for suc in SUCRANGE:
             self.addLink(
