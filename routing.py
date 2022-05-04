@@ -34,6 +34,8 @@ class NetworkTopo(Topo):
         WANMASK = "/24"
         SUCRANGE = range(SUCNO) # Puede salir mal. Cambiar por list-comp en todo caso
 
+        SUCIP = "10.0.{}.{}"
+
         central_router = self.addNode("r0", cls=Router)
 
         wan_switch_list = [self.addSwitch(f"ws{s + 1}") for s in SUCRANGE]
@@ -46,8 +48,24 @@ class NetworkTopo(Topo):
                 central_router,
                 intfName2=f"r0-eth{suc}",
                 params2={
-                    "ip": WANIP.format(8*(suc + 1) - 2)
+                    "ip": WANIP.format(8*(suc + 1) - 2) + "/29"
                 }
+            )
+
+        # Crear los routers de las sucursales
+
+        # Conectar los routers de sucursales a los switches
+
+        # Contectar los routers de sucursales a los switches de sucursales
+
+        # Conectar los switches de sucursales a los host
+
+        # Agregar los host a los switches de sucursales
+        for suc in SUCRANGE:
+            self.addHost(
+                f"h{suc + 1}",
+                ip=SUCIP.format(suc + 1, 254) + "/24",  # ip address add 10.0.{suc}.254/24 dev h{suc}-eth0 brd +
+                defaultRoute="via " + SUCIP.format(suc + 1, 1) # ip route add default via 10.0.{suc}.1
             )
 
 class Main:
@@ -60,7 +78,7 @@ class Main:
         )
 
         net.start()
-        info("*** Tabla de ruteo en Router Central ***")
+        info("*** Tabla de ruteo en Router Central ***\n")
         info(net["r0"].cmd("route"))
         CLI(net)
         net.stop()
