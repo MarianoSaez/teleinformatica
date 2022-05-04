@@ -36,11 +36,21 @@ class NetworkTopo(Topo):
 
         SUCIP = "10.0.{}.{}"
 
+        # Crear elementos de la red
         central_router = self.addNode("r0", cls=Router)
-
         wan_switch_list = [self.addSwitch(f"ws{s + 1}") for s in SUCRANGE]
         lan_switch_list = [self.addSwitch(f"ls{s + 1}") for s in SUCRANGE]
+        router_list = [self.addNode(f"r{suc + 1}", cls=Router) for suc in SUCRANGE]
+        host_list = [
+            self.addHost(
+                f"h{suc + 1}",
+                ip=SUCIP.format(suc + 1, 254) + "/24",  # ip address add 10.0.{suc}.254/24 dev h{suc}-eth0 brd +
+                defaultRoute="via " + SUCIP.format(suc + 1, 1) # ip route add default via 10.0.{suc}.1
+            )
+            for suc in SUCRANGE
+        ]
 
+        # Conectar los elementos entre si
         # Conectorizar los switches con el router central
         for suc in SUCRANGE:
             self.addLink(
@@ -52,21 +62,40 @@ class NetworkTopo(Topo):
                 }
             )
 
-        # Crear los routers de las sucursales
 
         # Conectar los routers de sucursales a los switches
+        for suc in SUCRANGE:
+            self.addLink(
+                router_list[suc],
+                wan_switch_list[suc],
+                intfName1=f"r{suc + 1}-eth0",
+                params1={
+                    "ip": WANIP.format(8*(suc + 1) - 7) + "/29"
+                }
+            )
 
         # Contectar los routers de sucursales a los switches de sucursales
+        for suc in SUCRANGE:
+            self.addLink(
+                lan_switch_list[suc],
+                router_list[suc],
+                intfName2=f"r{suc + 1}-eth1",
+                params2={
+                    "ip": SUCIP.format(suc + 1, 1) + "/24"  # ip address add 10.0.{suc}.1/24 dev r{suc}-eth1 brd +
+                }
+            )
 
         # Conectar los switches de sucursales a los host
-
-        # Agregar los host a los switches de sucursales
         for suc in SUCRANGE:
-            self.addHost(
-                f"h{suc + 1}",
-                ip=SUCIP.format(suc + 1, 254) + "/24",  # ip address add 10.0.{suc}.254/24 dev h{suc}-eth0 brd +
-                defaultRoute="via " + SUCIP.format(suc + 1, 1) # ip route add default via 10.0.{suc}.1
+            self.addLink(
+                host_list[suc],
+                lan_switch_list[suc],
+                intfName1=f"h{suc + 1}-eth0",
+                params1={
+                    "ip": SUCIP.format(suc + 1, 254) + "/24"
+                }
             )
+
 
 class Main:
     def main():
