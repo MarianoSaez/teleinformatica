@@ -113,11 +113,11 @@ class Main:
             net["r0"].cmd(f"ip route add {SUCIP.format(suc + 1, 0)}/24 via {WANIP.format(8*(suc + 1) - 7)}")
 
             for i in SUCRANGE:
-                if i == suc: continue
-                # Regla de ruteo para ir desde Sucursal hacia otras sucursales
-                net[f"r{suc + 1}"].cmd(f"ip route add {SUCIP.format(i + 1, 0)}/24 via {WANIP.format(8 * (i + 1) - 2)}")
-                # Regla de ruteo para ir desde router de Sucursal hacia routers de sucursales
-                net[f"r{suc + 1}"].cmd(f"ip route add {WANIP.format(8*i)}/29 via {WANIP.format(8 * (i + 1) - 2)}")
+                if i != suc:
+                    # Regla de ruteo para ir desde Sucursal hacia otras sucursales
+                    net[f"r{suc + 1}"].cmd(f"ip route add {SUCIP.format(i + 1, 0)}/24 via {WANIP.format(8 * (i + 1) - 2)}")
+                    # Regla de ruteo para ir desde router de Sucursal hacia routers de sucursales
+                    net[f"r{suc + 1}"].cmd(f"ip route add {WANIP.format(8*i)}/29 via {WANIP.format(8 * (i + 1) - 2)}")
 
         
         info("*** Tabla de ruteo en Router Central ***\n")
