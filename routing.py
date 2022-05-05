@@ -7,7 +7,7 @@ from mininet.log import setLogLevel, info
 from mininet.cli import CLI
 from mininet.node import OVSController
 
-SUCNO = 6   # Nro. de sucursales
+SUCNO = 2   # Nro. de sucursales
 WANIP = "192.168.100.{}"    # La red dispuesta es 192.168.100.0/24
 WANMASK = "/24"
 SUCRANGE = range(SUCNO) # Puede salir mal. Cambiar por list-comp en todo caso
@@ -116,7 +116,7 @@ class Main:
 
             for i in range(1, SUCNO + 1):
                 # Regla de ruteo para ir desde Sucursal hacia otras sucursales
-                print(f"ip route add {SUCIP.format(i + 1, 0)}/24 via {WANIP.format(8 * (i + 1) - 2)}")
+                print(f"ip route add {SUCIP.format(i + 1, 0)}/24 via {WANIP.format(8 * (suc + 1) - 2)}")
                 net[f"r{suc + 1}"].cmd(f"ip route add {SUCIP.format(i + 1, 0)}/24 via {WANIP.format(8 * (suc + 1) - 2)}")
                 # Regla de ruteo para ir desde router de Sucursal hacia routers de sucursales
                 net[f"r{suc + 1}"].cmd(f"ip route add {WANIP.format(8*i)}/29 via {WANIP.format(8 * (suc + 1) - 2)}")
