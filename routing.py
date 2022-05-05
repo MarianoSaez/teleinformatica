@@ -7,7 +7,7 @@ from mininet.log import setLogLevel, info
 from mininet.cli import CLI
 from mininet.node import OVSController
 
-SUCNO = 2   # Nro. de sucursales
+SUCNO = 6   # Nro. de sucursales
 WANIP = "192.168.100.{}"    # La red dispuesta es 192.168.100.0/24
 WANMASK = "/24"
 SUCRANGE = range(SUCNO) # Puede salir mal. Cambiar por list-comp en todo caso
