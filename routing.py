@@ -3,12 +3,6 @@ from mininet.node import Node
 from mininet.net import Mininet
 from mininet.log import setLogLevel, info
 from mininet.cli import CLI
-from mininet.node import OVSController
-
-SUCNO = 6   # Nro. de sucursales
-WANIP = "192.168.100.{}"    # La red dispuesta es 192.168.100.0/24
-SUCRANGE = range(SUCNO) # Puede salir mal. Cambiar por list-comp en todo caso
-SUCIP = "10.0.{}.{}"    # La red dispuesta para cada sucursal es 10.0.i.0/24
 
 
 class Router(Node):
@@ -50,8 +44,8 @@ class NetworkTopo(Topo):
         ]
 
         # Conectar los elementos de la red
-        # Conectar los switches con el router central
         for suc in SUCRANGE:
+            # Conectar los switches con el router central
             self.addLink(
                 wan_switch_list[suc],
                 central_router,
@@ -62,7 +56,7 @@ class NetworkTopo(Topo):
             )
 
 
-        # Conectar los routers de sucursales a los switches
+            # Conectar los routers de sucursales a los switches
             self.addLink(
                 router_list[suc],
                 wan_switch_list[suc],
@@ -72,7 +66,7 @@ class NetworkTopo(Topo):
                 }
             )
 
-        # Contectar los routers de sucursales a los switches de sucursales
+            # Contectar los routers de sucursales a los switches de sucursales
             self.addLink(
                 lan_switch_list[suc],
                 router_list[suc],
@@ -82,7 +76,7 @@ class NetworkTopo(Topo):
                 }
             )
 
-        # Conectar los switches de sucursales a los host
+            # Conectar los switches de sucursales a los host
             self.addLink(
                 host_list[suc],
                 lan_switch_list[suc],
@@ -120,6 +114,17 @@ class Main:
 
 
 if __name__ == "__main__":
+    import argparse as ap
+
+    parser = ap.ArgumentParser()
+    parser.add_argument("-n", type=int, default=6)
+    args = parser.parse_args()
+
+    SUCNO = args.n   # Nro. de sucursales
+    WANIP = "192.168.100.{}"    # La red dispuesta es 192.168.100.0/24
+    SUCRANGE = range(SUCNO) # Puede salir mal. Cambiar por list-comp en todo caso
+    SUCIP = "10.0.{}.{}"    # La red dispuesta para cada sucursal es 10.0.i.0/24
+
     setLogLevel('info')
     Main.main()
 
