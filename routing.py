@@ -115,6 +115,7 @@ class Main:
             net["r0"].cmd(f"ip route add {SUCIP.format(suc + 1, 0)}/24 via {WANIP.format(8*(suc + 1) - 7)}")
 
             for i in range(1, SUCNO + 1):
+                if i == suc + 1: continue
                 # Regla de ruteo para ir desde Sucursal hacia otras sucursales
                 print(f"ip route add {SUCIP.format(i, 0)}/24 via {WANIP.format(8 * (suc + 1) - 2)}")
                 net[f"r{suc + 1}"].cmd(f"ip route add {SUCIP.format(i , 0)}/24 via {WANIP.format(8 * (suc + 1) - 2)}")
