@@ -107,6 +107,7 @@ class Main:
 
         net.start()
 
+        print(net.keys())
         # Configurar tablas de ruteo a cada nodo intermedio
         for suc in SUCRANGE:
             # Regla de ruteo para ir de Central a Sucursales
@@ -114,7 +115,6 @@ class Main:
 
             for i in SUCRANGE:
                 if i != suc:
-                    print("i = %d, suc = %d" % i, suc)
                     # Regla de ruteo para ir desde Sucursal hacia otras sucursales
                     net[f"r{suc + 1}"].cmd(f"ip route add {SUCIP.format(i + 1, 0)}/24 via {WANIP.format(8 * (i + 1) - 2)}")
                     # Regla de ruteo para ir desde router de Sucursal hacia routers de sucursales
