@@ -1,5 +1,3 @@
-from distutils.util import run_2to3
-from uuid import RFC_4122
 from mininet.topo import Topo
 from mininet.node import Node
 from mininet.net import Mininet
@@ -9,9 +7,8 @@ from mininet.node import OVSController
 
 SUCNO = 6   # Nro. de sucursales
 WANIP = "192.168.100.{}"    # La red dispuesta es 192.168.100.0/24
-WANMASK = "/24"
 SUCRANGE = range(SUCNO) # Puede salir mal. Cambiar por list-comp en todo caso
-SUCIP = "10.0.{}.{}"
+SUCIP = "10.0.{}.{}"    # La red dispuesta para cada sucursal es 10.0.i.0/24
 
 
 class Router(Node):
@@ -102,29 +99,21 @@ class Main:
         net = Mininet(
             topo=topo,
             waitConnected=True,
-            controller=OVSController
         )
 
         net.start()
 
-        print(net.keys())
         # Configurar tablas de ruteo a cada nodo intermedio
-        for suc in SUCRANGE:
-            print(f"===============R{suc}=================")
+        for suc in SUCRANGE:   
             # Regla de ruteo para ir de Central a Sucursales
             net["r0"].cmd(f"ip route add {SUCIP.format(suc + 1, 0)}/24 via {WANIP.format(8*(suc + 1) - 7)}")
 
             for i in range(1, SUCNO + 1):
                 if i == suc + 1: continue
                 # Regla de ruteo para ir desde Sucursal hacia otras sucursales
-                print(f"ip route add {SUCIP.format(i, 0)}/24 via {WANIP.format(8 * (suc + 1) - 2)}")
                 net[f"r{suc + 1}"].cmd(f"ip route add {SUCIP.format(i , 0)}/24 via {WANIP.format(8 * (suc + 1) - 2)}")
                 # Regla de ruteo para ir desde router de Sucursal hacia routers de sucursales
                 net[f"r{suc + 1}"].cmd(f"ip route add {WANIP.format(8*i)}/29 via {WANIP.format(8 * (suc + 1) - 2)}")
-
-        
-        info("*** Tabla de ruteo en Router Central ***\n")
-        info(net["r0"].cmd("route"))
 
         CLI(net)
         net.stop()
